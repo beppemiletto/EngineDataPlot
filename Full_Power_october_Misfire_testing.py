@@ -30,8 +30,8 @@ ADA_file ="TRN_testing_MODE09_ASCII.csv"
 EMX_file =""
 AM_toff= 0
 AE_toff=100
-x_lim=[0,240]
-time_xtick_step = int((x_lim[1]-x_lim[0])/8)     #time
+x_lim=[0,200]
+time_xtick_step = int((x_lim[1]-x_lim[0])/10)     #time
 rpm_lim = [600,2000]
 rpm_step=200                        #rpm for Power Curve
 report_name = "TRN_testing_MODE09"
@@ -737,3 +737,89 @@ if PowerCurve:
     ax4r.legend(shadow=False, loc=(4),fontsize ='xx-small')
     fig.savefig(os.path.join(report_path, fig_name + '.svg'))
     fig.savefig(os.path.join(report_path, fig_name + '.png'))
+
+if   len(EMX_file)>=5:
+    ## Emissions plus general
+    fig_name = "ESC_Emissions_Lambdas"
+
+
+    ##x2 = ADA_dict[0]['values'] ## brake speed t
+    ##x3 = np.array(EMX_dict[0]['values'])+AE_toff ## EMX t
+    ##x4 = ADA_dict[0]['values'] ## Brake Torque t
+    ##x5 = np.array(MDF_dict[17]['time'])+AM_toff ## zsTexh t
+    ##x6 = np.array(MDF_dict[56]['time'])+AM_toff  ## zsUegoLambda t
+    ##
+    ##
+    ##
+    ##y2 = ADA_dict[6]['values']  ## brake speed
+    ##y4 = ADA_dict[7]['values'] ## Brake Torque
+    ##y5 = np.array(MDF_dict[17]['values']) ## zsTexh
+    ##y6 = np.array(MDF_dict[56]['values'])  ## zsUegoLambda
+
+    Tempo = EMX_dict[0]['values']
+    CH4 =np.array(EMX_dict[1]['values'])  ##1 CH4 ppm
+    NOx = np.array(EMX_dict[3]['values']) ##3 NOx ppm
+    LCO = np.array(EMX_dict[4]['values']) ##4 Basso LCO ppm
+    HCO = np.array(EMX_dict[5]['values'])/10000 ##5 Alto HCO %
+    CO2 = np.array(EMX_dict[6]['values'])/10000 ##6 CO2 %
+    HC  = np.array(EMX_dict[7]['values']) ##7 HC ppm
+
+    v_ADA_TOutTurbine = np.array(ADA_dict[22]['values'])
+    l_ADA_TOutTurbine = ADA_dict[22]['name']
+    v_ADA_TInCat = np.array(ADA_dict[23]['values'])
+    l_ADA_TInCat = ADA_dict[23]['name']
+    v_ADA_TOutCat = np.array(ADA_dict[24]['values'])
+    l_ADA_TOutCat = ADA_dict[24]['name']
+
+    fig = plt.figure(figsize=(10,8),dpi=200)
+    ax1 = fig.add_subplot(211)
+    ax1.plot(t_ADA, v_ADA_RPM,linestyle= 'solid',color = '#FF7F00FF',label=l_ADA_RPM)
+    ax1.plot(t_ADA,v_ADA_Torque, linestyle='solid',color = '#007F00FF',label=l_ADA_Torque)
+
+    ax1.set_xlim(x_lim)
+    ax1.set_xticks(range(x_lim[0],x_lim[1],time_xtick_step))
+    ax1.set_ylim([0,2250])
+    ax1.set_yticks([0,250, 500,750,1000,1250,1500,1750,2000,2250])
+    ax1.legend(shadow=True, loc=(8),fontsize ='xx-small')
+    ax1.grid()
+    ax2 = ax1.twinx()
+    ax2.plot(t_ADA, v_ADA_TOutTurbine,linestyle= 'solid',color = '#FF0F0FFF',label=l_ADA_TOutTurbine)
+    ax2.plot(t_ADA, v_ADA_TInCat,linestyle= 'solid',color = '#0F0F9FFF',label=l_ADA_TInCat)
+    ax2.plot(t_ADA, v_ADA_TOutCat,linestyle= 'solid',color = '#0FCF0FFF',label=l_ADA_TOutCat)
+    ax2.set_ylim([300,750])
+    ax2.set_yticks(range(300,750,50))
+    ax2.legend(shadow=True, loc=(9),fontsize ='xx-small')
+    ax1.set_title('Konzhak - ESC Emissions After Catalyst')
+    ax1.set_ylabel('Engine speed / torque')
+    ax2.set_ylabel('Catalyst Temperatures')
+
+
+    ax3 = fig.add_subplot(212)
+
+    ax3.plot(Tempo,CH4, linestyle='solid',color = '#0000FFFF',label=EMX_dict[1]['name'])
+    ax3.plot(Tempo,HC, linestyle='solid',color = '#7F7FFFFF',label=EMX_dict[7]['name'])
+    ax3.plot(Tempo,LCO, linestyle='solid',color = '#6F6F6FFF',label=EMX_dict[4]['name'])
+    ax3.plot(Tempo,NOx, linestyle='solid',color = '#DF0F0FFF',label=EMX_dict[3]['name'])
+    ax3.set_xlim(x_lim)
+    ax3.set_xticks(range(x_lim[0],x_lim[1],time_xtick_step))
+    ax3.set_ylim([0,2000])
+    ax3.set_yticks(range(000,2000,200))
+
+    ax3.set_xlabel('time (s)')
+    ax3.set_ylabel('Emission CH4,HC,Low CO, NOx [ppm]')
+    ax3.grid()
+    ax4 = ax3.twinx()
+    ax4.plot(Tempo,HCO, linestyle='solid',color = '#0F0F0FFF',label=EMX_dict[5]['name'])
+    ax4.plot(Tempo,CO2, linestyle='solid',color = '#7F7F0FFF',label=EMX_dict[6]['name'])
+    ax4.set_xlim(x_lim)
+    ax4.set_xticks(range(x_lim[0],x_lim[1],time_xtick_step))
+    ax4.set_ylim([0,10])
+    ax4.set_yticks(range(0,10,1))
+    ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
+    ax4.legend(shadow=False, loc=(6),fontsize ='xx-small')
+    ax4.set_ylabel('Emission HighCO,CO2 [%]')
+    ax4.grid()
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(report_path,fig_name+'.svg'))
+    fig.savefig(os.path.join(report_path,fig_name+'.png'))

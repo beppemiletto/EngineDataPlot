@@ -358,9 +358,9 @@ HCO = np.array(EMX_dict[5]['values'])/10000 ##5 Alto HCO %
 CO2 = np.array(EMX_dict[6]['values'])/10000 ##6 CO2 %
 HC  = np.array(EMX_dict[7]['values']) ##7 HC ppm
 
-TOutTurbine= np.array(ADA_dict[22]['values'])
-TInCat = np.array(ADA_dict[23]['values'])
-TOutCat = np.array(ADA_dict[24]['values'])
+v_ADA_TOutTurbine= np.array(ADA_dict[22]['values']) ; l_ADA_TOutTurbine = ADA_dict[22]['name']
+v_ADA_TInCat = np.array(ADA_dict[23]['values']) ; l_ADA_TInCat = ADA_dict[23]['name']
+v_ADA_TOutCat = np.array(ADA_dict[24]['values']) ; l_ADA_TOutCat = ADA_dict[24]['name']
 
 fig = plt.figure(figsize=(10,8),dpi=200)
 ax1 = fig.add_subplot(211)
@@ -374,9 +374,9 @@ ax1.set_yticks([0,250, 500,750,1000,1250,1500,1750,2000,2250])
 ax1.legend(shadow=True, loc=(8),fontsize ='xx-small')
 ax1.grid()
 ax2 = ax1.twinx()
-ax2.plot(x4, TOutTurbine,linestyle= 'solid',color = '#FF0F0FFF',label=ADA_dict[22]['name'])
-ax2.plot(x4, TInCat,linestyle= 'solid',color = '#0F0F9FFF',label=ADA_dict[23]['name'])
-ax2.plot(x4, TOutCat,linestyle= 'solid',color = '#0FCF0FFF',label=ADA_dict[24]['name'])
+ax2.plot(x4, v_ADA_TOutTurbine, linestyle='solid', color ='#FF0F0FFF', label=l_ADA_TOutTurbine)
+ax2.plot(x4, v_ADA_TInCat, linestyle='solid', color ='#0F0F9FFF', label=l_ADA_TInCat)
+ax2.plot(x4, v_ADA_TOutCat, linestyle='solid', color ='#0FCF0FFF', label=l_ADA_TOutCat)
 ax2.set_ylim([300,750])
 ax2.set_yticks(range(300,750,50))
 ax2.legend(shadow=True, loc=(9),fontsize ='xx-small')
