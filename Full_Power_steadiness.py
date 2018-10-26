@@ -277,9 +277,9 @@ t_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['time']) ## qsLamObtFin t
 v_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['values'])  ## qsLamObtFin
 l_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['name'])  ## qsLamObtFin label
 
-t_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['time'])+AM_toff ## vsTorqueReqVCM2 t
-v_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['values'])  ## vsTorqueReqVCM2
-l_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['name'])  ## vsTorqueReqVCM2 label
+t_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['time'])+AM_toff ## esTorqueReqExt t
+v_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['values'])  ## esTorqueReqExt
+l_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['name'])  ## esTorqueReqExt label
 
 t_MDF_zsMap = np.array(MDF_dict[zsMap]['time']) + AM_toff  ## zsMap t
 v_MDF_zsMap = np.array(MDF_dict[zsMap]['values'])  ## zsMap

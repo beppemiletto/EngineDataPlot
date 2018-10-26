@@ -23,17 +23,17 @@ def row_count(input):
 ## INPUT DATA AND FILES DEFINITIONS
 
 
-datafile_path = "D:\\Application_data\\yamzv8data\\"
+datafile_path = "D:\\Application_data\\yamzv8data\\Adamo_EMX_data\\"
 
-MDF_file = "Curve_Power_report_MDF.TXT"
-ADA_file ="Test_power_Curve_20180810.ASCII"
+MDF_file = "KL-100-cal_c_dev04-testing_CANAPE2018-10-18_16-28_086.csv"
+ADA_file ="KL-100-cal_c_dev04-testing_ASCII.csv"
 EMX_file =""
 AM_toff= 0
 AE_toff=100
 x_lim=[0,720]                       #time
 rpm_lim = [600,2000]
 rpm_step=200                        #rpm for Power Curve
-report_name = "FullPower_Curve_report"
+report_name = "FullPower_Curve_report_calC_dev07"
 PowerCurve = True                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
 
 
@@ -43,10 +43,10 @@ bsRPM=45; zsTExh=18; zsUegoLambda = 57; qsLamObtFin = 39; vsTorqueReqVCM2=31; zs
 zsPAtm = 13; zsPBoost = 14; zsTh2o=64; zsTAir=65; zsTRail=16; jsAdv=42; jsAdvBase=43
 
 ## ADAMO datafile parameters column number assignement
-ADA_Pboost = 37; ADA_P_Intake_Manifold = 38; ADA_P_Inlet_Turbocharger=39 ; ADA_P_out_Turbine=40; ADA_P_In_Cat =41;
-ADA_P_Out_Cat = 42; ADA_Brake_speed=6; ADA_Power_KW=4; ADA_Torque=7;ADA_CNG=9; ADA_T_h2o=25; ADA_T_H2O_Out_Engine=26
-ADA_T_Asp_Cyl_1=27; ADA_T_Asp_Cyl_4 = 28; ADA_T_Asp_Cyl_5=29; ADA_T_Asp_Cyl_8=30; ADA_T_Gas_Out_Rid = 31
-ADA_T_Gas_In_Rid= 32; ADA_T_Body_Reg = 33;ADA_T_Air_Env=11; T_In_Turbine_Cyl_1234 = 20; T_In_Turbine_Cyl_5678 = 21
+ADA_Pboost = 44; ADA_P_Intake_Manifold = 45; ADA_P_Inlet_Turbocharger=46 ; ADA_P_out_Turbine=47; ADA_P_In_Cat =48;
+ADA_P_Out_Cat = 49; ADA_Brake_speed=18; ADA_Power_KW=16; ADA_Torque=19;ADA_CNG=13; ADA_T_h2o=35; ADA_T_H2O_Out_Engine=36
+ADA_T_Asp_Cyl_1=37; ADA_T_Asp_Cyl_4 = 38; ADA_T_Asp_Cyl_5=39; ADA_T_Asp_Cyl_8=40; ADA_T_Gas_Out_Rid = 7
+ADA_T_Gas_In_Rid= 5; ADA_T_Body_Reg = 11;ADA_T_Air_Env=21; T_In_Turbine_Cyl_1234 = 30; T_In_Turbine_Cyl_5678 = 31
 
 ## TREATING MDF FROM CANAPE EXPORTED TO CSV (TXT FORMAT)
 if len(MDF_file)>=5:
@@ -284,9 +284,9 @@ t_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['time']) ## qsLamObtFin t
 v_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['values'])  ## qsLamObtFin
 l_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['name'])  ## qsLamObtFin label
 
-t_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['time'])+AM_toff ## vsTorqueReqVCM2 t
-v_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['values'])  ## vsTorqueReqVCM2
-l_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['name'])  ## vsTorqueReqVCM2 label
+t_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['time'])+AM_toff ## esTorqueReqExt t
+v_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['values'])  ## esTorqueReqExt
+l_MDF_vsTorqueReqVCM2 = np.array(MDF_dict[vsTorqueReqVCM2]['name'])  ## esTorqueReqExt label
 
 t_MDF_zsMap = np.array(MDF_dict[zsMap]['time']) + AM_toff  ## zsMap t
 v_MDF_zsMap = np.array(MDF_dict[zsMap]['values'])  ## zsMap
