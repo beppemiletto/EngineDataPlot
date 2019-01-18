@@ -23,18 +23,18 @@ def row_count(input):
 # INPUT DATA AND FILES DEFINITIONS
 
 
-datafile_path = "D:\\Application_data\\yamzv8data\\Adamo_EMX_data\\"
+datafile_path = "D:\\Application_data\\Report_C13\\MDF\\TXT"
 
-MDF_file = "TRN_testing_MODE09_CANAPE.csv"
-ADA_file ="TRN_testing_MODE09_ASCII.csv"
+MDF_file = "KL_050_20181108_MDF.CSV"
+ADA_file ="KL_050_20181108_ADA.CSV"
 EMX_file =""
 AM_toff= 0
 AE_toff=100
-x_lim=[0,200]
+x_lim=[0,600]
 time_xtick_step = int((x_lim[1]-x_lim[0])/10)     #time
 rpm_lim = [600,2000]
 rpm_step=200                        #rpm for Power Curve
-report_name = "TRN_testing_MODE09"
+report_name = "K_LOAD_050"
 PowerCurve = False                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
 # Contiguous series of exhaust temperature bulk treated
 start_column = 21   ## Starting column
@@ -42,11 +42,11 @@ n_line = 13  #  number of contiguous columns to be imported
 
 ## Define input signal location in columns
 ## MDF datafile parameters column number assignement starting from 0
-bsRPM=26; zsTExh=42; zsUegoLambda = 12; qsLamObtFin = 52; esTorqueReqExt=43; zsMap = 36; asEtasp = 27; esRefCurveConfig =62
-zsThrotPos = 37; zsPBoost = 39; zsTh2o=54; zsTAir=57; zsTRail=58; jsAdv=25; jsAdvBase=4
+# bsRPM=26; zsTKat=42; csO2ConcUEGO = 12; qsLamObtFin = 52; esTorqueReqExt=43; zsMap = 36; asEtasp = 27; esRefCurveConfig =62
+# zsThrotPos = 37; zsPBoost = 39; zsTh2o=54; zsTAir=57; zsTRail=58; jsAdv=25; jsAdvBase=4
 
-MDF_signals = ['bsRPM','zsTExh',' zsUegoLambda ','qsLamObtFin ','esTorqueReqExt','zsMap ','asEtasp ','esRefCurveConfig',
-'zsThrotPos','zsPBoost','zsTh2o','zsTAir','zsTRail','jsAdv','jsAdvBase=4']
+MDF_signals = ['bsRPM','zsTKat','csO2ConcUEGO','qsLamObtFin','esTorqueReqExt','zsMap','asEtasp ','esRefCurveConf',
+'zsThrotPos','zsPBoost','zsTh2o','zsTAir','zsTRail','jsAdv','jsAdvBase']
 
 ## ADAMO datafile parameters column number assignement starting from 0
 ADA_Pboost = 43; ADA_P_Intake_Manifold = 44; ADA_P_Inlet_Turbocharger=45 ; ADA_P_out_Turbine=46; ADA_P_In_Cat =47;
@@ -290,13 +290,13 @@ t_MDF_bsRPM = np.array(MDF_dict[bsRPM]['time'])+AM_toff ## bsRPM t
 v_MDF_bsRPM = MDF_dict[bsRPM]['values'] ## bsRPM
 l_MDF_bsRPM = MDF_dict[bsRPM]['name']  ## bsRPM label
 
-t_MDF_zsTExh = np.array(MDF_dict[zsTExh]['time'])+AM_toff ## zsTexh t
-v_MDF_zsTexh = np.array(MDF_dict[zsTExh]['values']) ## zsTexh
-l_MDF_zsTexh = MDF_dict[zsTExh]['name']  ## zsTexh label
+t_MDF_zsTExh = np.array(MDF_dict[zsTKat]['time'])+AM_toff ## zsTexh t
+v_MDF_zsTexh = np.array(MDF_dict[zsTKat]['values']) ## zsTexh
+l_MDF_zsTexh = MDF_dict[zsTKat]['name']  ## zsTexh label
 
-t_MDF_zsUegoLambda = np.array(MDF_dict[zsUegoLambda]['time'])+AM_toff  ## zsUegoLambda t
-v_MDF_zsUegoLambda = np.array(MDF_dict[zsUegoLambda]['values'])  ## zsUegoLambda
-l_MDF_zsUegoLambda = MDF_dict[zsUegoLambda]['name']  ## zsUegoLambda label
+t_MDF_zsUegoLambda = np.array(MDF_dict[csO2ConcUEGO]['time'])+AM_toff  ## csO2ConcUEGO t
+v_MDF_zsUegoLambda = np.array(MDF_dict[csO2ConcUEGO]['values'])  ## csO2ConcUEGO
+l_MDF_zsUegoLambda = MDF_dict[csO2ConcUEGO]['name']  ## csO2ConcUEGO label
 
 t_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['time']) ## qsLamObtFin t
 v_MDF_qsLamObtFin = np.array(MDF_dict[qsLamObtFin]['values'])  ## qsLamObtFin
@@ -517,7 +517,7 @@ if len(ADA_file)>=5 and len(MDF_file)>=5:
     ## Plotting exhaust temperatures of single cylinders in series
     for temp in range(n_line):
         ax3.plot(t_ADA,y_temp[temp], linestyle='solid',color = col_temp[temp],label=y_temp_label[temp])
-    ax3.plot(t_MDF_zsTExh,v_MDF_zsTexh, linestyle='solid',color = '#FF0000FF',label=MDF_dict[zsTExh]['name'])
+    ax3.plot(t_MDF_zsTExh,v_MDF_zsTexh, linestyle='solid',color = '#FF0000FF',label=MDF_dict[zsTKat]['name'])
     ax3.set_xlim(x_lim)
     ax3.set_xticks(range(x_lim[0],x_lim[1],time_xtick_step))
     ax3.set_ylim([300,800])
@@ -527,7 +527,7 @@ if len(ADA_file)>=5 and len(MDF_file)>=5:
     ax3.set_ylabel('Temperatures [degC]')
     ax3.grid()
     ax4 = ax3.twinx()
-    ax4.plot(t_MDF_zsUegoLambda,v_MDF_zsUegoLambda, linestyle='solid',color = '#7F7F003F',label=MDF_dict[zsUegoLambda]['name'])
+    ax4.plot(t_MDF_zsUegoLambda,v_MDF_zsUegoLambda, linestyle='solid',color = '#7F7F003F',label=MDF_dict[csO2ConcUEGO]['name'])
     ax4.plot(t_MDF_qsLamObtFin,v_MDF_qsLamObtFin, linestyle='solid',color = '#bF7F008F',label=MDF_dict[qsLamObtFin]['name'])
     ax4.set_ylim([0.8,1.8])
     ax4.set_yticks([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8])
@@ -747,14 +747,14 @@ if   len(EMX_file)>=5:
     ##x3 = np.array(EMX_dict[0]['values'])+AE_toff ## EMX t
     ##x4 = ADA_dict[0]['values'] ## Brake Torque t
     ##x5 = np.array(MDF_dict[17]['time'])+AM_toff ## zsTexh t
-    ##x6 = np.array(MDF_dict[56]['time'])+AM_toff  ## zsUegoLambda t
+    ##x6 = np.array(MDF_dict[56]['time'])+AM_toff  ## csO2ConcUEGO t
     ##
     ##
     ##
     ##y2 = ADA_dict[6]['values']  ## brake speed
     ##y4 = ADA_dict[7]['values'] ## Brake Torque
     ##y5 = np.array(MDF_dict[17]['values']) ## zsTexh
-    ##y6 = np.array(MDF_dict[56]['values'])  ## zsUegoLambda
+    ##y6 = np.array(MDF_dict[56]['values'])  ## csO2ConcUEGO
 
     Tempo = EMX_dict[0]['values']
     CH4 =np.array(EMX_dict[1]['values'])  ##1 CH4 ppm
