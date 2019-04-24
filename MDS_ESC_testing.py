@@ -11,12 +11,37 @@ from ada_data import Ada_Data
 from mdf_data import Mdf_Data
 from esc_cycle_detect import ESC_Detect
 import datetime
+import pickle
 
 def row_count(input):
     with open(input) as f:
         for i, l in enumerate(f):
             pass
     return i
+
+# esc_seq_segment: return the index [i start : i end] of any kind of signal Y=f(time)
+def esc_seq_segment(times,values,segment):
+    """
+    :type times: object 1d array float times
+    :type values: object 1d array (int, float, bool) values for Y signal
+    :type segment: object tuple (float time_start, float time_end)
+    """
+    start_found = False
+    end_found = False
+    t_start = segment[0]
+    t_end = segment[1]
+    for idx, t in enumerate(times):
+
+        if (not start_found) and (t >= t_start):
+            i_start = idx
+            start_found = True
+        if (not end_found) and (t >= t_end):
+            i_end  = idx
+            end_found = True
+            break
+    return [times[i_start:i_end],values[i_start:i_end]]
+
+
 
 # INPUT DATA AND FILES DEFINITIONS
 
@@ -27,6 +52,7 @@ print("Current date and time using isoformat: {}".format(now.isoformat()))
 data_path = "D:\Application_data\Report_C13\HDS9"
 ada_filename = "MDS_test_ESC_20190314_ASCII.csv"
 mdf_filename = "Recorder_1903141022.TXT"
+esc_detect_filename = "ESC_test_MDS_C13_"
 AM_toff= -162.70
 AE_toff=100
 x_lim=[0,8500] ; x_tick = 500
@@ -73,7 +99,8 @@ print("Current date and time using isoformat: {}".format(now.isoformat()))
 ## Define input signal names
 # CANAPE datafile parameters
 mdf_signal_list = ['bsRPM', 'zsTExh', 'zsUegoLambda', 'qsLamObtFin', 'esTorqueReqExt', 'zsMap', 'zsPBoost',
-                   'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank" ]
+                   'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank", "qsInjTemperature",
+                   "qsTInj", "zsTRail"]
 
 # ADAMO datafile parameters
 ada_signal_list = [
@@ -82,7 +109,7 @@ ada_signal_list = [
     "T_Asp_Cyl_1", "T_Asp_Cyl_4", "T_Asp_Cyl_5", "T_amb_Box", "T_Gas_Out_Rid",
     "T_Gas_In_Rid", "T_Body_Rid","T_Air", "T_Exh_Cyl_1", "T_Exh_Cyl_2", "T_Exh_Cyl_3", "T_Exh_Cyl_4","T_Exh_Cyl_5",
     "T_Exh_Cyl_6", "T_Exh_Cyl_7", "T_Exh_Cyl_8", "T_In_Turbine_Cyl_1234", "T_In_Turbine_Cyl_5678",
-    "T_In_Cat", "T_Out_Cat"                   ]
+    "T_In_Cat", "T_Out_Cat" , "PtankF_BOSCH"]
 
 #########################################################
 ## Report section preparing figures
@@ -158,7 +185,7 @@ del adamo_data_dict, adamo_data
 
 t_ADA = v_ADA_Timestamp-v_ADA_Timestamp[0] ## ADAMO datafile time
 
-print("Ready for calcualate other pars ")
+print("Ready for calculate other parameters ")
 
 # Calculated parameters
 cv_ADA_BSFC = v_ADA_CNG/v_ADA_Power*1000
@@ -172,8 +199,15 @@ col_temp = ['#FF00FF7F', '#FF00FF9F', '#FF00FFBF', '#FF00FFDF', '#0000FF7F', '#0
 
 
 # detect ESCs
-esc_detector = ESC_Detect(rpm= v_ADA_Brake_speed_F,load = v_ADA_Engine_Torque,time = t_ADA, engine_speeds=[650,1250,1400,1650],loads=[560,1050,1600,2000] , tolerance= 0.15)
-esc_seq = esc_detector.detect_subcycles()
+
+esc_detector = ESC_Detect(rpm= v_ADA_Brake_speed_F,load = v_ADA_Engine_Torque,time = t_ADA, engine_speeds=[650,1250,1400,1650],loads=[560,1050,1600,2000] , tolerance= 0.15 )
+esc_seq_dict = esc_detector.detect_subcycles()
+esc_seq=[]
+esc_completed = []
+for key, record in esc_seq_dict.items():
+    esc_seq.append(record["segment"])
+    esc_completed.append(record["esc_complete"])
+
 
 
 report_path = os.path.join(data_path,report_name)
@@ -187,6 +221,7 @@ if not (os.path.exists(report_path)):
 # ## Temperatures plus general
 if len(t_ADA)>=5 :
     fig_name = "Full_Test_WorkingPoints_Temperatures"
+    print("Generating and writing the chart {} global of ESC test in {}".format(fig_name,data_path))
     fig = plt.figure(figsize=(10,8),dpi=200)
     ax1 = fig.add_subplot(211)
     ax1.plot(t_MDF_bsRPM,v_MDF_bsRPM,linestyle= 'solid',color = '#FF0000FF',label=l_MDF_bsRPM)
@@ -237,99 +272,153 @@ if len(t_ADA)>=5 :
 
     fig.tight_layout()
     fig.savefig(os.path.join(report_path,fig_name+'.png'))
+    esc_seq_dict['000']['gloabl_chart_png']=os.path.join(report_path,fig_name+'.png')
     fig.savefig(os.path.join(report_path,fig_name+'.svg'))
+    esc_seq_dict['000']['gloabl_chart_svg']=os.path.join(report_path,fig_name+'.svg')
+    plt.close('all')
 
-## Environmental plus combustion
-# if len(t_ADA)>=5:
-#     fig_name = "PowerSteady_Environment_Combustion"
-#     fig = plt.figure(figsize=(10,12),dpi=200)
-#     ax1 = fig.add_subplot(311)
-#     ax1.plot(t_MDF_bsRPM,v_MDF_bsRPM,linestyle= 'solid',color = '#FF0000FF',label=canape_data_dict['{:03d}'.format(mdf_sigmap['bsRPM]['name'])
-#     ax1.plot(t_ADA, v_ADA_RPM,linestyle= 'solid',color = '#FF7F00FF',label=ADA_dict[6]['name'])
-#     ax1.plot(t_ADA,v_ADA_Torque, linestyle='solid',color = '#007F00FF',label=ADA_dict[7]['name'])
-#     ax1.plot(t_MDF_vsTorqueReqVCM2,v_MDF_vsTorqueReqVCM2, linestyle='solid',color = '#2F2F2FFF',label=canape_data_dict['{:03d}'.format(mdf_sigmap['vsTorqueReqVCM2]['name'])
-#     ax1.set_xlim(x_lim)
-#     ax1.set_xticks(range(x_lim[0],x_lim[1],120))
-#     ax1.set_ylim([0,2250])
-#     ax1.set_yticks([0,250, 500,750,1000,1250,1500,1750,2000,2250])
-#     ax1.legend(shadow=True, loc=(8),fontsize ='xx-small')
-#     ax1.grid()
-#     ax2 = ax1.twinx()
-#     ax2.plot(t_ADA,v_ADA_PowerKW, linestyle='solid',color = '#ff0087FF',label=ADA_dict[4]['name'])
-#     ax2.plot(t_ADA,cv_ADA_BSFC, linestyle='solid',color = '#7e0640FF',label=cl_ADA_BSFC)
-#     ax2.set_ylim([0,450])
-#     ax2.set_yticks(range(0,450,50))
-#     ax2.legend(shadow=True, loc=(9),fontsize ='xx-small')
-# ax1.set_title('Konzhak - '+report_name+' - Environmental and Combustion')
-#     ax1.set_ylabel('Engine speed [rpm]/ Torque [Nm]')
-#     ax2.set_ylabel('Engine Power [kW]/ BSFC [g/kWh]')
-#
-#
-#     ax3 = fig.add_subplot(312)
-#
-#     ax3.plot(t_MDF_zsPBoost,v_MDF_zsPBoost, linestyle='solid',color = '#FF0000FF',label=l_MDF_zsPBoost)
-#     ax3.plot(t_ADA,v_ADA_Pboost, linestyle='solid',color = '#AF0000FF',label=l_ADA_Pboost)
-#     ax3.plot(t_MDF_zsMap,v_MDF_zsMap, linestyle='solid',color = '#00007FFF',label=l_MDF_zsMap)
-#     ax3.plot(t_ADA,v_ADA_P_Intake_Manifold, linestyle='solid',color = '#00008FFF',label=l_ADA_P_Intake_Manifold)
-#     ax3.plot(t_ADA,v_ADA_P_Inlet_Turbocharger, linestyle='solid',color = '#b26f19FF',label=l_ADA_P_Inlet_Turbocharger)
-#     ax3.plot(t_ADA,v_ADA_P_out_Turbine, linestyle='solid',color = '#553915FF',label=l_ADA_P_out_Turbine)
-#     ax3.plot(t_ADA,v_ADA_P_In_Cat, linestyle='solid',color = '#1e6315FF',label=l_ADA_P_In_Cat)
-#     ax3.plot(t_ADA,v_ADA_P_Out_Cat, linestyle='solid',color = '#24a614FF',label=l_ADA_P_Out_Cat)
-#
-#     ax3.set_xlim(x_lim)
-#     ax3.set_xticks(range(x_lim[0],x_lim[1],120))
-#     ax3.set_ylim([0,3000])
-#     ax3.set_yticks(range(0,3000,250))
-#
-#     ax3.set_xlabel('time (s)')
-#     ax3.set_ylabel('Pressures [mbar]')
-#     ax3.grid()
-#     ax4 = ax3.twinx()
-#     ax4.plot(t_MDF_zsUegoLambda,v_MDF_zsUegoLambda, linestyle='solid',color = '#7F7F003F',label=canape_data_dict['{:03d}'.format(mdf_sigmap['zsUegoLambda]['name'])
-#     ax4.plot(t_MDF_qsLamObtFin,v_MDF_qsLamObtFin, linestyle='solid',color = '#bF7F008F',label=canape_data_dict['{:03d}'.format(mdf_sigmap['qsLamObtFin]['name'])
-#     ax4.set_ylim([0.8,2.0])
-#     ax4.set_yticks([0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8])
-#     ax3.legend(shadow=False, loc=(3),fontsize ='xx-small')
-#     ax4.legend(shadow=False, loc=(4),fontsize ='xx-small')
-#     ax4.set_ylabel('Exhaust Lambda')
-#     ax4.grid()
-#
-#     ax3 = fig.add_subplot(313)
-#
-#
-#     ax3.plot(t_MDF_zsTAir,v_MDF_zsTAir, linestyle='solid',color = '#0b6eceFF',label=l_MDF_zsTAir)
-#     ax3.plot(t_MDF_zsTh2o,v_MDF_zsTh2o, linestyle='solid',color = '#a82c1bFF',label=l_MDF_zsTh2o)
-#     ax3.plot(t_MDF_zsTRail,v_MDF_zsTRail, linestyle='solid',color = '#13800dFF',label=l_MDF_zsTRail)
-#     ax3.plot(t_ADA,v_ADA_T_Air_Env, linestyle='solid',color = '#878dffFF',label=l_ADA_T_Air_Env)
-#     ax3.plot(t_ADA,v_ADA_T_Asp_Cyl_1, linestyle='solid',color = '#ff15ce9F',label=l_ADA_T_Asp_Cyl_1)
-#     ax3.plot(t_ADA,v_ADA_T_Asp_Cyl_4, linestyle='solid',color = '#ff15ceCF',label=l_ADA_T_Asp_Cyl_4)
-#     ax3.plot(t_ADA,v_ADA_T_Asp_Cyl_1, linestyle='solid',color = '#0d10809F',label=l_ADA_T_Asp_Cyl_5)
-#     ax3.plot(t_ADA,v_ADA_T_Asp_Cyl_4, linestyle='solid',color = '#0d1080CF',label=l_ADA_T_Asp_Cyl_8)
-#     ax3.plot(t_ADA,v_ADA_T_Body_Reg, linestyle='solid',color = '#31b62bCF',label=l_ADA_T_Body_Reg)
-#     ax3.plot(t_ADA,v_ADA_T_Gas_Out_Rid, linestyle='solid',color = '#103b0eCF',label=l_ADA_T_Gas_Out_Rid)
-#     ax3.set_xlim(x_lim)
-#     ax3.set_xticks(range(x_lim[0],x_lim[1],120))
-#     ax3.set_ylim([-40,120])
-#     ax3.set_yticks(range(-40,120,10))
-#
-#     ax3.set_xlabel('time (s)')
-#     ax3.set_ylabel('Temperatures [degC]')
-#     ax3.grid()
-#     ax4 = ax3.twinx()
-#     ax4.plot(t_MDF_jsAdv,v_MDF_jsAdv, linestyle='solid',color = '#ff04004F',label=l_MDF_jsAdv)
-#     ax4.plot(t_MDF_jsAdvBase,v_MDF_jsAdvBase, linestyle='solid',color = '#bf0400CF',label=l_MDF_jsAdvBase)
-#
-#     ax4.set_ylim([-20,60])
-#     ax4.set_yticks(range(-20,60,10))
-#     ax3.legend(shadow=False, loc=(3),fontsize ='xx-small')
-#     ax4.legend(shadow=False, loc=(4),fontsize ='xx-small')
-#     ax4.set_ylabel('Spark Advance [deg BTDC]')
-#     ax4.grid()
-#
-#     fig.tight_layout()
-#     fig.savefig(os.path.join(report_path,fig_name+'.svg'))
-#     fig.savefig(os.path.join(report_path,fig_name+'.png'))
-#
-#
-#
+
+
+for esc_num in range(len(esc_seq_dict)):
+    segment = esc_seq_dict['{:03d}'.format(esc_num)]['segment']
+    esc_completed = esc_seq_dict['{:03d}'.format(esc_num)]['esc_complete']
+    figure_1 = True
+    figure_2 = True
+    # Figure for General Data of performance and temperatures
+    if figure_1:
+        fig_name = "WorkingPoints_Temperatures_ESC_num_{}".format(esc_num+1)
+        print("Generating and writing the chart 1 {} for segment {} on total {} of ESC test in {}".format(fig_name,esc_num+1,len(esc_seq_dict),data_path))
+        title = "{}\n{}".format(fig_name,
+                                "Simplified ESC complete" if esc_completed else "Simplified ESC NOT completed")
+        fig = plt.figure(figsize=(10, 8), dpi=200)
+        ax1 = fig.add_subplot(211)
+        [x,y] =  esc_seq_segment(t_MDF_bsRPM, v_MDF_bsRPM, segment )
+        ax1.plot(x,y,linestyle='solid', color='#FF0000FF', label=l_MDF_bsRPM)
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_Brake_speed_F, segment)
+        ax1.plot(x, y, linestyle='solid', color='#FF7F00FF', label=l_ADA_Brake_speed_F)
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_Engine_Torque, segment)
+        ax1.plot(x, y, linestyle='solid', color='#007F00FF', label=l_ADA_Engine_Torque)
+        # ax1.set_xlim(x_lim)
+        # ax1.set_xticks(range(x_lim[0], x_lim[1], x_tick))
+        ax1.set_ylim([0, 2500])
+        ax1.set_yticks(range(0,2500,250))
+        ax1.legend(shadow=True, loc=(LEGEND_LOWER_C), fontsize='xx-small')
+        ax1.grid()
+        ax2 = ax1.twinx()
+        [x,y] =  esc_seq_segment(t_MDF_zsPTank, v_MDF_zsPTank, segment)
+        ax2.plot(x,y, linestyle='solid', color='#ff0087FF', label=l_MDF_zsPTank)
+        ax2.set_ylim([0, 250000])
+        ax2.set_yticks(range(0, 250000, 25000))
+        ax2.legend(shadow=True, loc=(LEGEND_UPPER_C), fontsize='xx-small')
+        ax1.set_title(title)
+        ax1.set_ylabel('Engine speed [rpm]/ Torque [Nm]')
+        ax2.set_ylabel('Tank Pressure [mbar]')
+
+        ax3 = fig.add_subplot(212)
+
+
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_T_In_Turbine_Cyl_1234, segment)
+        ax3.plot(x, y, linestyle='solid', color=col_temp[1], label=l_ADA_T_In_Turbine_Cyl_1234)
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_T_In_Turbine_Cyl_5678, segment)
+        ax3.plot(x, y, linestyle='solid', color=col_temp[3], label=l_ADA_T_In_Turbine_Cyl_5678)
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_T_In_Cat, segment)
+        ax3.plot(x, y, linestyle='solid', color=col_temp[5], label=l_ADA_T_In_Cat)
+        [x,y] =  esc_seq_segment(t_ADA, v_ADA_T_Out_Cat, segment)
+        ax3.plot(x, y, linestyle='solid', color=col_temp[7], label=l_ADA_T_Out_Cat)
+        [x,y] =  esc_seq_segment(t_MDF_zsTExh, v_MDF_zsTExh, segment)
+        ax3.plot(x, y, linestyle='solid', color='#FF0000FF', label=l_MDF_zsTExh, )
+        # ax3.set_xlim(x_lim)
+        # ax3.set_xticks(range(x_lim[0], x_lim[1], x_tick))
+        ax3.set_ylim([300, 800])
+        ax3.set_yticks(range(300, 800, 50))
+        ax3.legend(shadow=True, loc=(LEGEND_LOWER_C), fontsize='xx-small')
+
+        ax3.set_xlabel('time (s)')
+        ax3.set_ylabel('Temperatures [degC]')
+        ax3.grid()
+        ax4 = ax3.twinx()
+        [x,y] =  esc_seq_segment(t_MDF_zsUegoLambda, v_MDF_zsUegoLambda, segment)
+        ax4.plot(x, y, linestyle='solid', color='#7F7F003F', label=l_MDF_zsUegoLambda)
+        [x,y] =  esc_seq_segment(t_MDF_qsLamObtFin, v_MDF_qsLamObtFin, segment)
+        ax4.plot(x, y, linestyle='solid', color='#bF7F008F', label=l_MDF_qsLamObtFin)
+        ax4.set_ylim([0.8, 2.8])
+        ax4.set_yticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.4, 2.6, 2.8])
+        # ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
+        ax4.legend(shadow=False, loc=(LEGEND_UPPER_R), fontsize='xx-small')
+        ax4.set_ylabel('Exhaust Lambda')
+        ax4.grid()
+
+        fig.tight_layout()
+        fig.savefig(os.path.join(report_path, fig_name + '.png'))
+        esc_seq_dict['{:03d}'.format(esc_num)]['chart1_segment_png'] = os.path.join(report_path, fig_name + '.png')
+        fig.savefig(os.path.join(report_path, fig_name + '.svg'))
+        esc_seq_dict['{:03d}'.format(esc_num)]['chart1_segment_svg'] = os.path.join(report_path, fig_name + '.svg')
+
+
+
+    if figure_2:
+        fig_name = "Fuel_System_Pressure_and_Injection_ESC_num_{}".format(esc_num+1)
+        print("Generating and writing the chart 2 {} for segment {} on total {} of ESC test in {}".format(fig_name,esc_num+1,len(esc_seq_dict),data_path))
+        title = "{}\n{}".format(fig_name,"Simplified ESC complete" if esc_completed else "Simplified ESC NOT completed" )
+        fig = plt.figure(figsize=(10, 8), dpi=200)
+        ax1 = fig.add_subplot(211)
+        [x, y] = esc_seq_segment(t_MDF_bsRPM, v_MDF_bsRPM, segment)
+        ax1.plot(x, y, linestyle='solid', color='#FF0000FF', label=l_MDF_bsRPM)
+        [x, y] = esc_seq_segment(t_ADA, v_ADA_Engine_Torque, segment)
+        ax1.plot(x, y, linestyle='solid', color='#007F00FF', label=l_ADA_Engine_Torque)
+        # ax1.set_xlim(x_lim)
+        # ax1.set_xticks(range(x_lim[0], x_lim[1], x_tick))
+        ax1.set_ylim([0, 2500])
+        ax1.set_yticks(range(0,2500,250))
+        ax1.legend(shadow=True, loc=(LEGEND_LOWER_C), fontsize='xx-small')
+        ax1.grid()
+        ax2 = ax1.twinx()
+        [x, y] = esc_seq_segment(t_MDF_zsTRail, v_MDF_zsTRail, segment)
+        ax2.plot(x, y, linestyle='solid', color='#ff0087FF', label=l_MDF_zsTRail)
+        ax2.set_ylim([-40, 60])
+        ax2.set_yticks(range(-40, 60, 10))
+        ax2.legend(shadow=True, loc=(LEGEND_UPPER_C), fontsize='xx-small')
+        ax1.set_title(title)
+        ax1.set_ylabel('Engine speed [rpm]/ Torque [Nm]')
+        ax2.set_ylabel('Fuel Rail GAS Temperature [degC]')
+
+        ax3 = fig.add_subplot(212)
+
+        [x, y] = esc_seq_segment(t_ADA, v_ADA_PtankF_BOSCH, segment)
+        ax3.plot(x, y*1000, linestyle='solid', color=col_temp[1], label=l_ADA_PtankF_BOSCH)
+        [x, y] = esc_seq_segment(t_MDF_zsPTank, v_MDF_zsPTank, segment)
+        ax3.plot(x, y, linestyle='solid', color=col_temp[3], label=l_MDF_zsPTank)
+        [x, y] = esc_seq_segment(t_MDF_qsTInj, v_MDF_qsTInj, segment)
+        ax3.plot(x, y, linestyle='solid', color='#FF0000FF', label=l_MDF_qsTInj, )
+        # ax3.set_xlim(x_lim)
+        # ax3.set_xticks(range(x_lim[0], x_lim[1], x_tick))
+        ax3.set_ylim([0, 225000])
+        ax3.set_yticks(range(0, 225000, 25000))
+        ax3.legend(shadow=True, loc=(LEGEND_LOWER_L), fontsize='xx-small')
+
+        ax3.set_xlabel('time (s)')
+        ax3.set_ylabel('High Pressure [mbar] - Injection time [usec]')
+        ax3.grid()
+        ax4 = ax3.twinx()
+        [x, y] = esc_seq_segment(t_MDF_zsPRail, v_MDF_zsPRail, segment)
+        ax4.plot(x, y, linestyle='solid', color='#007F00FF', label=l_MDF_zsPRail)
+        ax4.set_ylim([0,9000 ])
+        ax4.set_yticks(range(0,9000,1000))
+        # ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
+        ax4.legend(shadow=False, loc=(LEGEND_UPPER_R), fontsize='xx-small')
+        ax4.set_ylabel('Fuel Rail GAS Pressure [mbarA]')
+        ax4.grid()
+
+        fig.tight_layout()
+        fig.savefig(os.path.join(report_path, fig_name + '.png'))
+        esc_seq_dict['{:03d}'.format(esc_num)]['chart2_segment_png'] = os.path.join(report_path, fig_name + '.png')
+        fig.savefig(os.path.join(report_path, fig_name + '.svg'))
+        esc_seq_dict['{:03d}'.format(esc_num)]['chart2_segment_svg'] = os.path.join(report_path, fig_name + '.svg')
+
+    plt.close('all')
+esc_output_file_prefix = os.path.join(report_path,esc_detect_filename)
+pickle_filename = "{}_sequence.pickle".format(esc_output_file_prefix)
+
+with open(pickle_filename, 'wb') as pickle_file:
+    pickle.dump(esc_seq_dict, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
 print("Exit OK")
