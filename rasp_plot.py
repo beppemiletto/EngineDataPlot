@@ -12,8 +12,7 @@ import sys
 import collections
 import bisect
 import datetime
-from ada_data import Ada_Data
-from mdf_data import Mdf_Data
+from rasp_data import Rasp_Data
 from matplotlib import colors as mcolors
 
 
@@ -28,32 +27,22 @@ now = datetime.datetime.now()
 
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 
-data_path = "D:\Application_data\yamzv8data\cal_0D_05"
-ada_filename = "KL_100_20190430_CAL_0D_05.ASCII"
-mdf_filename = "KL_100_20190430_cal0D_05.TXT"
+data_path = "D:\\Application_data\\yamzv8data\\test_P800521_P225"
+enable_rasp = True
+rasp_filename = "MDS_snP051_20190430_164334.csv"
+
 
 num_cyls = 8            # number of cylinders of engine, for plotting the exhaust temperatures of single cylinder
 
-canape_data = Mdf_Data(data_path,mdf_filename)
+rasp_data = Rasp_Data(data_path,rasp_filename)
 
-canape_data_dict = canape_data.load_data()
+rasp_data_dict = rasp_data.load_data()
 
-if canape_data_dict is None:
+if rasp_data_dict is None:
     print("Errore, controlla i dati di input")
     sys.exit(1)
 
 
-adamo_data = Ada_Data(data_path,ada_filename)
-
-adamo_data_dict = adamo_data.load_data()
-
-if adamo_data_dict is None:
-    print("Errore, controlla i dati di input")
-    sys.exit(2)
-
-print('finish')
-
-EMX_file =""
 LEGEND_BEST =	0
 LEGEND_UPPER_R = 1
 LEGEND_UPPER_L = 2
@@ -71,23 +60,19 @@ AE_toff=100
 x_lim=[0,720]                       #time
 rpm_lim = [600,2000]
 rpm_step=200                        #rpm for Power Curve
-report_name = "FullPower_Curve_report"
-PowerCurve = True                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
+report_name = "Rasperry_Datalog_Report"
 
+StatsPicture = False                   # Set True if plotting statistics is needed, False if only plot f(time) needed
 ## Define input signal names
-# CANAPE datafile parameters
-mdf_signal_list = ['bsRPM', 'zsTExh', 'zsUegoLambda', 'qsLamObtFin', 'esTorqueReqExt', 'zsMap', 'zsPBoost',
-                   'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank",
-                   "qsTInj", "zsTRail"]
-
-# ADAMO datafile parameters
-ada_signal_list = [
-    "Timestamp","CNG", "Pboost", "P_Intake_Manifold", "P_Inlet_Turbocharger", "P_out_Turbine", "P_out_Turbine",
-    "P_Out_Cat", "Brake_speed_F", "Power", "Engine_Torque","CNG",  "T_in_H20_Rid",
-    "T_Asp_Cyl_1", "T_Asp_Cyl_4", "T_Asp_Cyl_5", "T_Asp_Cyl_8", "T_amb_Box",
-    "T_Gas_In_Rid", "T_Body_Rid","T_Air", "T_Exh_Cyl_1", "T_Exh_Cyl_2", "T_Exh_Cyl_3", "T_Exh_Cyl_4","T_Exh_Cyl_5",
-    "T_Exh_Cyl_6", "T_Exh_Cyl_7", "T_Exh_Cyl_8", "T_In_Turbine_Cyl_1234", "T_In_Turbine_Cyl_5678",
-    "T_In_Cat", "T_Out_Cat" , "PtankF_BOSCH"]
+# raspberry datafile parameters
+rasp_signal_list = ['Timestamp_Unix','TC_HPH_GAS_IN','TC_HPH_GAS_OUT','TC_HPH_H2O_IN','TC_HPH_H2O_OUT', 'TC_HPH_BODY',
+                    'TC_MDS_GAS_OUT', 'TC_TANK', 'TC_EXH', 'HPH_PCNG_IN', 'MDS_PTANK', 'MDS_P1S', 'MDS_PGAS_OUT',
+                    'MDS_TRNG_IN', 'MDS_TRH2O_IN','MDS_TRH2O_OUT', 'HPH_QH2O', 'MDS_TRENV', 'MDS_TRBODY',
+                    'Tachograph_Vehicle_Speed', 'Transmission_Current_Gear', 'Engine_Coolant_Temperature',
+                    'Engine_Fuel_Temperature', 'Engine_Oil_Temperature', 'Engine_ECU_Temperature', 'Engine_Speed',
+                    'Engine_Demand_Percent_Torque','Engine_Boost_Pressure', 'Engine_Intake_Manifold_Temperature',
+                    'Engine_Intake_Manifold_Pressure', 'Engine_Exhaust_Temperature', 'Engine_Fuel_Rate', 'Spark_Advance',
+                    'zsMap', 'asPre','zsPrail', 'asAirMain', 'qsTinj', 'WasteGateDC','EngineMode', 'fsKO2','usCorrAdat' ]
 
 
 #########################################################
@@ -97,44 +82,27 @@ ada_signal_list = [
 ## preparing arrays for plotting ---------------
 # Looking for needed signal from the complete datasets
 
-mdf_sigmap = dict()
-for idx,signal in enumerate(canape_data_dict):
-    for idy, name in enumerate(mdf_signal_list):
-        if canape_data_dict['{:03d}'.format(idx)]['name']==name:
-            mdf_sigmap[name]= idx
-            mdf_signal_list[idy]= "Found"
 
-print(mdf_sigmap)
-mdf_sign_lost = False
-for idy, name in enumerate(mdf_signal_list):
-    if name != "Found":
-        print("The signal {} not found".format(name))
-        mdf_sign_lost = True
 
-if not mdf_sign_lost:
-    print("Found all signals from Canape datafile")
-else:
-    print("Missing signals from Canape datafile! Exit!")
-    sys.exit(1)
+rasp_sigmap = dict()
+for idx,signal in enumerate(rasp_data_dict):
+    for idy, name in enumerate(rasp_signal_list):
+        if rasp_data_dict['{:03d}'.format(idx)]['name']==name:
+            rasp_sigmap[name]= idx
+            rasp_signal_list[idy]= "Found"
 
-ada_sigmap = dict()
-for idx,signal in enumerate(adamo_data_dict):
-    for idy, name in enumerate(ada_signal_list):
-        if adamo_data_dict['{:03d}'.format(idx)]['name']==name:
-            ada_sigmap[name]= idx
-            ada_signal_list[idy]= "Found"
+print(rasp_sigmap)
 
-print(ada_sigmap)
-ada_sign_lost = False
-for idy, name in enumerate(ada_signal_list):
+rasp_sign_lost = False
+for idy, name in enumerate(rasp_signal_list):
     if name != "Found":
         print("The signal {} not found".format(name))
         ada_sign_lost = True
 
-if not ada_sign_lost:
-    print("Found all signals from Adamo datafile")
+if not rasp_sign_lost:
+    print("Found all signals from Raspberry datafile")
 else:
-    print("Missing signals from Adamo datafile! Exit!")
+    print("Missing signals from Raspberry datafile! Exit!")
     sys.exit(1)
 
 print("Ready for assigning values and other stuffs")
@@ -298,7 +266,7 @@ cl_ADA_BSFC = "BSFC gr/kWh"
 
 
 # Preparing Power Curve Aggregations
-if PowerCurve:
+if StatsPicture:
     PowerCurve_data_file= report_name+'_PowerCurve.pickle'
     PowerCurve_pickle = os.path.join(data_path,PowerCurve_data_file)
 
@@ -529,7 +497,7 @@ if len(PowerCurve_dict)>=5:
 ######################################################################################################################
 ## Power Curve Plot f(RPM)
 ######################################################################################################################
-if PowerCurve:
+if StatsPicture:
     PC_rpm=[];
     PC_torque=[];PC_torque_std=[];PC_torque_high=[];PC_torque_low=[];          PC_power=[];PC_power_std=[]
     PC_BSFC=[];PC_BSFC_std=[];
