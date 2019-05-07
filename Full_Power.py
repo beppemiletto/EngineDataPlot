@@ -649,7 +649,7 @@ if PowerCurve:
 
 
 
-    fig_name = "PowerCurve"
+    fig_name = "StatsPicture"
 
     fig = plt.figure(num=4,figsize=(210/25.4,297/25.4),dpi=200)
     gs1 = gridspec.GridSpec(nrows=5, ncols=1, left=0.15, right=0.85, wspace=0.00,hspace=0.00)

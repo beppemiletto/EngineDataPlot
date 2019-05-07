@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import os
 
+
 class ESC_Detect():
     def __init__(self, rpm = None, load = None, time=None, engine_speeds = None, loads = None,  tolerance = None):
         self.rpm = rpm
@@ -34,7 +35,7 @@ class ESC_Detect():
     # Detect the subcycle of eventually repeating ESC
     def detect_subcycles(self):
         # looking for beginning checking idle before first acceleration
-        esc_seq = []
+        esc_seq = {}
         mode = 0
         esc_num = 0
         sample = 0
@@ -199,10 +200,19 @@ class ESC_Detect():
                     continue
 
             elif mode == 13:
-                esc_seq.append((t0,ti))
+                esc_complete = True
+                esc_seq['{:03d}'.format(esc_num)]={"segment":(t0,ti),"esc_complete":esc_complete}
                 mode = 0
                 trigger = False
                 sample = 0
                 esc_num += 1
+                esc_complete = False
+
+        if t0 > 0:
+            esc_seq['{:03d}'.format(esc_num)]={"segment":(t0,ti),"esc_complete":esc_complete}
+
+
+
+
 
         return esc_seq

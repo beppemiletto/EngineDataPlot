@@ -18,7 +18,7 @@ class Ada_Data():
 
 
 # data_path = "D:\Application_data\Report_C13\HDS9"
-# ada_filename = "MDS_test_ESC_20190308_ASCII.csv"
+# rasp_filename = "MDS_test_ESC_20190308_ASCII.csv"
 
         self.ada_filepath = os.path.join(self.data_path, self.ada_filename)
 
