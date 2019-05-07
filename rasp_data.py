@@ -66,7 +66,7 @@ class Rasp_Data():
                                 except:
 
                                     if idx  < len(col_names):
-                                        self.rasp_dik['{:03d}'.format(idx)]['data'].append(col_data)
+                                        self.rasp_dik['{:03d}'.format(idx)]['data'].append(0.0)
                                     else:
                                         break
                             print("Data row = {}\r".format(data_rows),end='',flush=True)
