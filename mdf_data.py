@@ -65,8 +65,14 @@ class Mdf_Data():
                         for idx,col_data in enumerate(row):
                             if idx < len(self.mdf_dik):
                                 if self.mdf_dik['{:03d}'.format(idx)]['name'] == 't':
-                                    ts = float(col_data.replace(',','.'))
-                                if col_data != ' ' and col_data != '' :
+                                    if data_rows == 1:
+                                        # check if time start with some offset
+                                        if float(col_data.replace(',','.'))> 0.0:
+                                            mdf_t_offset = float(col_data.replace(',','.'))
+                                        else:
+                                            mdf_t_offset = 0.0
+                                    ts = float(col_data.replace(',','.')) - mdf_t_offset
+                                if col_data != ' ' and col_data != '':
                                     try:
                                         self.mdf_dik['{:03d}'.format(idx)]['data'].append(float(col_data.replace(',','.')))
                                         self.mdf_dik['{:03d}'.format(idx)]['time'].append(ts)

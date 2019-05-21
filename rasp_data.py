@@ -45,10 +45,6 @@ class Rasp_Data():
                     for row in csv_reader:
                         if line_count== 0:
                             col_names= row
-                            # print(f'Column names are {", ".join(row)}')
-                            # print(f'Column meas units are {", ".join(row)}')
-                            col_um = row
-
                             for idx,col_name in enumerate(col_names):
                                 self.rasp_dik['{:03d}'.format(idx)]= {}
                                 self.rasp_dik['{:03d}'.format(idx)]['name']=col_name.split(' ')[0].replace('-','_').replace(')','').replace('(','_')
@@ -56,7 +52,7 @@ class Rasp_Data():
                                 self.rasp_dik['{:03d}'.format(idx)]['data']=[]
                                 print(self.rasp_dik['{:03d}'.format(idx)])
                             data_rows = 0
-                        elif line_count>= 1:
+                        elif line_count>= 1 and len(row) == len(col_names):
                             # print(f'Values number  are {", ".join(row)}')
 
                             data_rows +=1
