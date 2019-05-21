@@ -27,12 +27,10 @@ now = datetime.datetime.now()
 
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 
-data_path = "D:\\Application_data\\yamzv8data\\test_P800521_P225"
+data_path = "D:\\Application_data\\yamzv8data\\cal_0E_0B"
 enable_rasp = True
-rasp_filename = "MDS_snP051_20190506_0900.csv"
-report_name = "Rasperry_Datalog_Report_{}".format(rasp_filename.split('.')[0])
-
-num_cyls = 8            # number of cylinders of engine, for plotting the exhaust temperatures of single cylinder
+rasp_filename = "MDS_snP051_20190521_100230.csv"
+report_name = "CAL0E_0B_ESCTEST_HANA_{}".format(rasp_filename.split('.')[0])
 
 rasp_data = Rasp_Data(data_path,rasp_filename)
 
@@ -122,22 +120,23 @@ t = np.array(rasp_data_dict['000']['data'])
 t_RASP = t-t0_rasp
 t_mu = 's'
 
-if max(t_RASP) < 60:
-    x_lim = [0,60]
-elif max(t_RASP) < 600 :
-    x_lim = [0, 600]
-elif max(t_RASP) < 1200 :
-    x_lim = [0, 1200]
-elif max(t_RASP) < 1800 :
-    x_lim = [0, 2400]
-elif max(t_RASP) < 3600 :
-    x_lim = [0, 3600]
-else:
-    t_RASP = t_RASP/60
-    x_lim = [0, 60]
+t_num_tick = 12
+t_steps = [5,10,30,60,120,300,600,900,1200,1800,3600,7200]
+t_fraction = max(t_RASP)/t_num_tick
+
+for step in t_steps:
+    if step >= t_fraction:
+        t_step = step
+        break
+if t_step >= 600:
+    t_RASP = t_RASP / 60
+    t_step = int(t_step/60)
     t_mu = 'min.'
 
+x_lim = [0, int(t_step*t_num_tick)]
 
+
+del t_steps, t_fraction
 
 
 

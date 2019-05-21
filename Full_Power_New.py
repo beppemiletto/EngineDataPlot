@@ -28,11 +28,16 @@ now = datetime.datetime.now()
 
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 
-data_path = "D:\Application_data\yamzv8data\cal_0D_05"
-ada_filename = "KL_100_20190430_CAL_0D_05.ASCII"
-mdf_filename = "KL_100_20190430_cal0D_05.TXT"
+data_path = "D:\Application_data\yamzv8data\cal_0E_0B"
+ada_filename = "ADA_KL_100_20190521_CAL_0E_0B.txt"
+mdf_filename = "MDF_KL_100_20190521_cal0E_0B.TXT"
 
 num_cyls = 8            # number of cylinders of engine, for plotting the exhaust temperatures of single cylinder
+
+# creating a range of cluster for aggregating on engine speed
+PowCurveRPM_min = 600
+PowCurveRPM_max = 2100
+PowCurveRPM_stp = 50
 
 canape_data = Mdf_Data(data_path,mdf_filename)
 
@@ -67,18 +72,19 @@ LEGEND_UPPER_C = 9
 LEGEND_CENTER = 10
 
 AM_toff= 0
-AE_toff=100
+
 x_lim=[0,720]                       #time
-rpm_lim = [600,2000]
-rpm_step=200                        #rpm for Power Curve
-report_name = "FullPower_Curve_report"
+rpm_lim = [PowCurveRPM_min,PowCurveRPM_max]
+rpm_step= 100                     #rpm for Power Curve
+report_name = "FullPower_Curve_report_CAL0D0A"
 PowerCurve = True                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
 
 ## Define input signal names
 # CANAPE datafile parameters
-mdf_signal_list = ['bsRPM', 'zsTExh', 'zsUegoLambda', 'qsLamObtFin', 'esTorqueReqExt', 'zsMap', 'zsPBoost',
+# missing removed pars :  'zsUegoLambda','qsLamObtFin', 'zsMap',"qsTInj",
+mdf_signal_list = ['bsRPM', 'zsTExh',  'esTorqueReqExt', 'zsPBoost','zsUegoLambda','qsLamObtFin', 'zsMap',"qsTInj",
                    'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank",
-                   "qsTInj", "zsTRail"]
+                    "zsTRail"]
 
 # ADAMO datafile parameters
 ada_signal_list = [
@@ -292,7 +298,19 @@ if len(EMX_file)>=5:
 #TODO here we are with debug
 
 # Calculated parameters
-cv_ADA_BSFC = v_ADA_CNG/v_ADA_Power*1000
+iidx_old=0
+for idx,sample in enumerate(v_ADA_Brake_speed_F):
+    time_sample = t_ADA[idx]
+    for iidx, t_bsRPM in enumerate(t_MDF_bsRPM[iidx_old:]):
+        if t_bsRPM >= time_sample:
+            v_ADA_Brake_speed_F[idx] = v_MDF_bsRPM[iidx_old+iidx]
+            iidx_old += iidx
+            break
+
+# recalculate power based on correct engine speed from ECU
+v_ADA_Power=v_ADA_Brake_speed_F*v_ADA_Engine_Torque/ 9548.8
+
+cv_ADA_BSFC = np.array(v_ADA_CNG/v_ADA_Power*1000)
 cl_ADA_BSFC = "BSFC gr/kWh"
 
 
@@ -308,9 +326,8 @@ if PowerCurve:
             PowerCurve_dict = pickle.load(handle)
     else:
         print("Starting Power Curve Aggregation")
-        PowCurveRPM_min = 600
-        PowCurveRPM_max = 2050
-        PowCurveRPM_stp = 50
+
+
         PowCurveRPM_Points= range(PowCurveRPM_min,PowCurveRPM_max,PowCurveRPM_stp)
         PowerCurve_dict = collections.OrderedDict()
         for point in PowCurveRPM_Points:
@@ -321,11 +338,19 @@ if PowerCurve:
             PowerCurve_dict[point]['boost']=[]
             PowerCurve_dict[point]['lambda']=[]
             PowerCurve_dict[point]['adv']=[]
+
+        # MAIN LOOP for creating clusters on Power Curve Parameters
+        iidx_old = 0
+        adv_idx_old = 0
+        lambda_idx_old = 0
+
         for idx,sample in enumerate(v_ADA_Brake_speed_F):
             time_sample = t_ADA[idx]
-            for iidx, t_request in enumerate(t_MDF_esTorqueReqExt):
+
+            for iidx, t_request in enumerate(t_MDF_esTorqueReqExt[iidx_old:]):
                 if t_request>=time_sample:
-                    v_request = v_MDF_esTorqueReqExt[iidx]
+                    v_request = v_MDF_esTorqueReqExt[iidx_old+iidx]
+                    iidx_old += iidx
                     break
             valid = False
             if v_request>=95:
@@ -334,18 +359,14 @@ if PowerCurve:
 
 
             if valid:
-
-                for iidx, t_bsRPM in enumerate(t_MDF_bsRPM):
-                    if t_bsRPM >= time_sample:
-                        sample = v_MDF_bsRPM[iidx]
-                        break
                 ind = bisect.bisect_left(list(PowerCurve_dict.keys()), sample)
                 # print(sample,ind)
                 # RPM cluster
                 try:
                     PowerCurve_dict[PowCurveRPM_Points[ind]]['rpm'].append(sample)
                     PowerCurve_dict[PowCurveRPM_Points[ind]]['torque'].append(v_ADA_Engine_Torque[idx])
-                    PowerCurve_dict[PowCurveRPM_Points[ind]]['power'].append(v_ADA_Power[idx])
+                    # change the power from measure from Adamo to calculated RPM ECU * measured torque
+                    PowerCurve_dict[PowCurveRPM_Points[ind]]['power'].append(sample*v_ADA_Engine_Torque[idx]/9548.8)
                     PowerCurve_dict[PowCurveRPM_Points[ind]]['BSFC'].append(cv_ADA_BSFC[idx])
                     PowerCurve_dict[PowCurveRPM_Points[ind]]['texh1234'].append(v_ADA_T_In_Turbine_Cyl_1234[idx])
                     PowerCurve_dict[PowCurveRPM_Points[ind]]['texh5678'].append(v_ADA_T_In_Turbine_Cyl_5678[idx])
@@ -356,13 +377,15 @@ if PowerCurve:
                     # exit(2)
                     break
 
-                for iidx, t_MDF in enumerate(t_MDF_zsUegoLambda):
+                for lambda_idx, t_MDF in enumerate(t_MDF_zsUegoLambda[lambda_idx_old:]):
                     if t_MDF >= time_sample:
-                        PowerCurve_dict[PowCurveRPM_Points[ind]]['lambda'].append(v_MDF_zsUegoLambda[iidx])
+                        PowerCurve_dict[PowCurveRPM_Points[ind]]['lambda'].append(v_MDF_zsUegoLambda[lambda_idx_old+lambda_idx])
+                        lambda_idx_old += lambda_idx
                         break
-                for iidx, t_MDF in enumerate(t_MDF_jsAdv):
+                for adv_idx, t_MDF in enumerate(t_MDF_jsAdv[adv_idx_old:]):
                     if t_MDF >= time_sample:
-                        PowerCurve_dict[PowCurveRPM_Points[ind]]['adv'].append(v_MDF_jsAdv[iidx])
+                        PowerCurve_dict[PowCurveRPM_Points[ind]]['adv'].append(v_MDF_jsAdv[adv_idx_old+adv_idx])
+                        adv_idx_old += adv_idx
                         break
         print("END Aggregation")
         with open(PowerCurve_pickle, 'wb') as handle:
@@ -443,7 +466,6 @@ if len(PowerCurve_dict)>=5:
     ax1.plot(t_MDF_bsRPM,v_MDF_bsRPM,linestyle= 'solid',color = '#FF0000FF',label=l_MDF_bsRPM)
     ax1.plot(t_ADA, v_ADA_Brake_speed_F,linestyle= 'solid',color = '#FF7F00FF',label=l_ADA_Brake_speed_F)
     ax1.plot(t_ADA,v_ADA_Engine_Torque, linestyle='solid',color = '#007F00FF',label=l_ADA_Engine_Torque)
-    ax1.plot(t_MDF_esTorqueReqExt,v_MDF_esTorqueReqExt, linestyle='solid',color = '#2F2F2FFF',label=l_MDF_esTorqueReqExt)
     ax1.set_xlim(x_lim)
     ax1.set_xticks(range(x_lim[0],x_lim[1],120))
     ax1.set_ylim([0,2250])
@@ -453,6 +475,7 @@ if len(PowerCurve_dict)>=5:
     ax2 = ax1.twinx()
     ax2.plot(t_ADA,v_ADA_Power, linestyle='solid',color = '#ff0087FF',label=l_ADA_Power)
     ax2.plot(t_ADA,cv_ADA_BSFC, linestyle='solid',color = '#7e0640FF',label=cl_ADA_BSFC)
+    ax2.plot(t_MDF_esTorqueReqExt,v_MDF_esTorqueReqExt, linestyle='solid',color = '#2F2F2FFF',label=l_MDF_esTorqueReqExt)
     ax2.set_ylim([0,450])
     ax2.set_yticks(range(0,450,50))
     ax2.legend(shadow=True, loc=(9),fontsize ='xx-small')
@@ -574,8 +597,8 @@ if PowerCurve:
 
     #Power plot with + and - 3 sigma
     ax1.plot(PC_rpm,PC_power,linestyle='solid',color = '#ff0400FF',label="Power [kW]")
-    ax1.plot(PC_rpm,PC_power_high,linestyle='solid',color = '#ff04008F',label="+3 std")
-    ax1.plot(PC_rpm,PC_power_low,linestyle='solid',color = '#ff04004F',label="-3 std")
+    # ax1.plot(PC_rpm,PC_power_high,linestyle='solid',color = '#ff04008F',label="+3 std")
+    # ax1.plot(PC_rpm,PC_power_low,linestyle='solid',color = '#ff04004F',label="-3 std")
     ax1.set_xlim(rpm_lim); ax1.set_xticks(range(rpm_lim[0],rpm_lim[-1],rpm_step))
     ax1.set_ylim(0,400);ax1.set_yticks(range(0,400,50),minor=True)
 
@@ -586,8 +609,8 @@ if PowerCurve:
     #Torque plot with + and - 3 sigma
     ax1r = ax1.twinx()
     ax1r.plot(PC_rpm,PC_torque,linestyle='solid',color = '#0404FFFF',label="Torque [Nm]")
-    ax1r.plot(PC_rpm,PC_torque_high,linestyle='solid',color = '#0404FF8F',label="+3 std")
-    ax1r.plot(PC_rpm,PC_torque_low,linestyle='solid',color = '#0404FF4F',label="-3 std")
+    # ax1r.plot(PC_rpm,PC_torque_high,linestyle='solid',color = '#0404FF8F',label="+3 std")
+    # ax1r.plot(PC_rpm,PC_torque_low,linestyle='solid',color = '#0404FF4F',label="-3 std")
     ax1r.set_xlim(rpm_lim); ax1r.set_xticks(range(rpm_lim[0],rpm_lim[-1],rpm_step))
     ax1r.set_ylim(500,2500);ax1r.set_yticks(range(500,2500,250),minor=True)
     ax1r.set_ylabel('Engine Torque [Nm]')
@@ -596,12 +619,12 @@ if PowerCurve:
 
     #BSFC plot with + and - 3 sigma
     ax2.plot(PC_rpm, PC_BSFC, linestyle='solid', color='#37874dFF', label="BSFC [g/kWh]")
-    ax2.plot(PC_rpm, PC_BSFC_high, linestyle='solid', color='#37874d8F', label="+3 std")
-    ax2.plot(PC_rpm, PC_BSFC_low, linestyle='solid', color='#37874d4F', label="-3 std")
+    # ax2.plot(PC_rpm, PC_BSFC_high, linestyle='solid', color='#37874d8F', label="+3 std")
+    # ax2.plot(PC_rpm, PC_BSFC_low, linestyle='solid', color='#37874d4F', label="-3 std")
     ax2.set_xlim(rpm_lim);
     ax2.set_xticks(range(rpm_lim[0], rpm_lim[-1], rpm_step))
-    ax2.set_ylim(100, 300);
-    ax2.set_yticks(range(100, 300, 20), minor=True)
+    ax2.set_ylim(150, 250);
+    ax2.set_yticks(range(150, 240, 10), minor=True)
     ax2.set_ylabel("BSFC [g/kWh]")
     ax2.grid()
     ax2.legend(shadow=False, loc=(3),fontsize ='xx-small')
