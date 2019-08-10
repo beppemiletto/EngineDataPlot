@@ -1,6 +1,6 @@
 
 """
-Simple demo with multiple subplots.
+Power Curve Data Analysis and Graphics
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,9 +28,9 @@ now = datetime.datetime.now()
 
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 
-data_path = "D:\Application_data\yamzv8data\cal_0E_0B"
-ada_filename = "ADA_KL_100_20190521_CAL_0E_0B.txt"
-mdf_filename = "MDF_KL_100_20190521_cal0E_0B.TXT"
+data_path = "D:\Application_data\yamzv8data\cal_0E_0F"
+ada_filename = "ADA_KL_100_20190529_CAL_0E_0F_test2.txt"
+mdf_filename = "MDF_KL_100_20190529_cal0E_0F_test2.TXT"
 
 num_cyls = 8            # number of cylinders of engine, for plotting the exhaust temperatures of single cylinder
 
@@ -44,7 +44,7 @@ canape_data = Mdf_Data(data_path,mdf_filename)
 canape_data_dict = canape_data.load_data()
 
 if canape_data_dict is None:
-    print("Errore, controlla i dati di input")
+    print("Error, control input data")
     sys.exit(1)
 
 
@@ -53,7 +53,7 @@ adamo_data = Ada_Data(data_path,ada_filename)
 adamo_data_dict = adamo_data.load_data()
 
 if adamo_data_dict is None:
-    print("Errore, controlla i dati di input")
+    print("Error, control input data")
     sys.exit(2)
 
 print('finish')
@@ -76,7 +76,7 @@ AM_toff= 0
 x_lim=[0,720]                       #time
 rpm_lim = [PowCurveRPM_min,PowCurveRPM_max]
 rpm_step= 100                     #rpm for Power Curve
-report_name = "FullPower_Curve_report_CAL0D0A"
+report_name = "FullPower_Curve_report_CAL0E_0F_WITH_FAN"
 PowerCurve = True                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
 
 ## Define input signal names
