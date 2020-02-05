@@ -51,14 +51,13 @@ now = datetime.datetime.now()
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 
 data_path = "D:\\Application_data\\yamzv8data\\TUV_Prague_Tests\\2019-08-Wisetime"
-tuv_filename = "20190808_ETC_1929.txt"
-mdf_filename_list = ["MDF_20190808_ETC_1929.txt"]
-mdf_time_offsets_list = [18.945-53.25]                        # offset time in seconds (initial points of TUV file)
-esc_detect_filename = "ESC_test_MDS_C13_"
+tuv_filename = "20190820_ETC_1943.txt"
+mdf_filename_list = ["MDF_20190820_ETC_1943.txt"]
+mdf_time_offsets_list = [18.91-36.34]                        # offset time in seconds (initial points of TUV file)
 
 x_lim=[0,1800] ; x_tick = 100
 ETC_segments=[(0,300),(300,600),(600,900),(900,1200),(1200,1500),(1500,1800)]
-report_name = "ETC_1929"
+report_name = "ETC_1943"
 
 LEGEND_BEST =	0
 LEGEND_UPPER_R = 1
@@ -361,12 +360,12 @@ if len(t_TUV)>=5 :
     # ax3.plot(t_TUV,v_TUV_T_Out_Cat, linestyle='solid',color = col_temp[7],label=l_TUV_T_Out_Cat)
     ax3.plot(t_TUV,v_cum_NOx, linestyle='solid',color = '#FF0000FF',label=l_cum_NOx)
     ax3.plot(t_TUV,v_cum_CO, linestyle='solid',color = '#0A0A0AFF',label=l_cum_CO)
-    ax3.plot(t_TUV,v_cum_CH4, linestyle='solid',color = '#0A0A7FFF',label=l_cum_CH4)
-    ax3.plot(t_TUV,v_cum_THC, linestyle='solid',color = '#0A0AFFFF',label=l_cum_THC)
+    ax3.plot(t_TUV,v_cum_CH4, linestyle='solid',color = '#0F0FFFFF',label=l_cum_CH4)
+    ax3.plot(t_TUV,v_cum_THC, linestyle='solid',color = '#0AFFFFFF',label=l_cum_THC)
     ax3.set_xlim(x_lim)
     ax3.set_xticks(range(x_lim[0],x_lim[1],x_tick))
-    # ax3.set_ylim([300,800])
-    # ax3.set_yticks(range(300,800,50))
+    ax3.set_ylim([0, 10])
+    ax3.set_yticks(np.arange(0, 10, 0.5))
     ax3.legend(shadow=True, loc=(LEGEND_LOWER_R),fontsize ='xx-small')
 
     ax3.set_xlabel('time (s)')
@@ -375,8 +374,8 @@ if len(t_TUV)>=5 :
     ax4 = ax3.twinx()
     ax4.plot(t_MDF_zsUegoLambda,v_MDF_zsUegoLambda, linestyle='solid',color = '#7F7F003F',label=l_MDF_zsUegoLambda)
     ax4.plot(t_MDF_qsLamObtFin,v_MDF_qsLamObtFin, linestyle='solid',color = '#bF7F008F',label=l_MDF_qsLamObtFin)
-    ax4.set_ylim([0.75,1.75])
-    ax4.set_yticks([0.75,0.8,0.85,0.9,0.95,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35,1.4,1.45,1.5,1.55,1.6,1.65,1.7,1.75])
+    ax4.set_ylim([0.75, 1.75])
+    ax4.set_yticks(np.arange(0.75, 1.75, 0.05))
     # ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
     ax4.legend(shadow=False, loc=(LEGEND_UPPER_R),fontsize ='xx-small')
     ax4.set_ylabel('Exhaust Lambda')
@@ -406,28 +405,25 @@ if len(t_TUV)>=5 :
         ax1.grid()
         ax2 = ax1.twinx()
         ax2.plot(t_MDF_zsMap, v_MDF_zsMap, linestyle='solid', color='#ff0087FF', label=l_MDF_zsMap)
+        ax2.plot(t_MDF_zsPBoost, v_MDF_zsPBoost, linestyle='solid', color='#00ff87FF', label=l_MDF_zsPBoost)
         ax2.set_ylim([0, 2500])
         ax2.set_yticks(range(0, 2500, 100))
         ax2.legend(shadow=True, loc=(LEGEND_UPPER_C), fontsize='xx-small')
         ax1.set_title('YaMZ V8 - ' + report_name + ' - Emission and temperatures')
         ax1.set_ylabel('Engine speed [rpm]/ Torque [Nm]')
-        ax2.set_ylabel('Tank Pressure [mbar]')
+        ax2.set_ylabel('MAP and Boost Pressures [mbar]')
 
         ax3 = fig.add_subplot(212)
 
-        #
-        # ax3.plot(t_TUV,v_TUV_T_In_Turbine_Cyl_1234, linestyle='solid',color = col_temp[1],label=l_TUV_T_In_Turbine_Cyl_1234)
-        # ax3.plot(t_TUV,v_TUV_T_In_Turbine_Cyl_5678, linestyle='solid',color = col_temp[3],label=l_TUV_T_In_Turbine_Cyl_5678)
-        # ax3.plot(t_TUV,v_TUV_T_In_Cat, linestyle='solid',color = col_temp[5],label=l_TUV_T_In_Cat)
-        # ax3.plot(t_TUV,v_TUV_T_Out_Cat, linestyle='solid',color = col_temp[7],label=l_TUV_T_Out_Cat)
+
         ax3.plot(t_TUV, v_cum_NOx, linestyle='solid', color='#FF0000FF', label=l_cum_NOx)
         ax3.plot(t_TUV, v_cum_CO, linestyle='solid', color='#0A0A0AFF', label=l_cum_CO)
-        ax3.plot(t_TUV, v_cum_CH4, linestyle='solid', color='#0A0A7FFF', label=l_cum_CH4)
-        ax3.plot(t_TUV, v_cum_THC, linestyle='solid', color='#0A0AFFFF', label=l_cum_THC)
+        ax3.plot(t_TUV, v_cum_CH4, linestyle='solid', color='#0F0FFFFF', label=l_cum_CH4)
+        ax3.plot(t_TUV, v_cum_THC, linestyle='solid', color='#0AFFFFFF', label=l_cum_THC)
         ax3.set_xlim(ETC_segment)
         ax3.set_xticks(range(ETC_segment[0],ETC_segment[1], 25))
-        # ax3.set_ylim([300,800])
-        # ax3.set_yticks(range(300,800,50))
+        ax3.set_ylim([0,10])
+        ax3.set_yticks(np.arange(0,10,0.5))
         ax3.legend(shadow=True, loc=(LEGEND_LOWER_R), fontsize='xx-small')
 
         ax3.set_xlabel('time (s)')
@@ -439,10 +435,9 @@ if len(t_TUV)>=5 :
         ax4.plot(t_MDF_fsKO2, v_MDF_fsKO2, linestyle='solid', color='#7F7F7FFF', label=l_MDF_fsKO2)
 
         ax4.set_ylim([0.75, 1.75])
-        ax4.set_yticks(
-            [0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65,
-             1.7, 1.75])
-        # ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
+        ax4.set_yticks(np.arange(0.75,1.75,0.05))
+
+        ax3.legend(shadow=False, loc=(4),fontsize ='xx-small')
         ax4.legend(shadow=False, loc=(LEGEND_UPPER_R), fontsize='xx-small')
         ax4.set_ylabel('Exhaust Lambda')
         ax4.grid()

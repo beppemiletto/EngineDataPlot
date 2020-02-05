@@ -5,6 +5,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="Full_Power_New_190517_missingMDF.v_MDF_bsRPM" />
+          <option value="WHTC_testing.*" />
         </list>
       </option>
     </inspection_tool>
