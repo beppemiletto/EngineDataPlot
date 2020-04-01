@@ -4,6 +4,7 @@
     <extensionMap>
       <mapping pattern="edit" type="PLAIN_TEXT" />
       <mapping ext="kv" type="PLAIN_TEXT" />
+      <mapping ext="a2l" type="PLAIN_TEXT" />
       <mapping ext="qt4onlylinux" type="Python" />
     </extensionMap>
   </component>
