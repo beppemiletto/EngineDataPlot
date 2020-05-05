@@ -35,8 +35,8 @@ now = datetime.datetime.now()
 print("Current date and time using isoformat: {}".format(now.isoformat()))
 engine_project_name = 'OM906_NGV_SP - '
 data_path = "D:\\Application_data\\Mercedes_NGV"
-bosmal_filename = "WHTC_Day7_1_Hot_05022020_10Hz.txt"
-mdf_filename_list = ["WHTC_Day7_1_Hot_05022020_10Hz_MDF.txt"]
+bosmal_filename = "WHTC_Day7_3_Hot_05022020_10Hz.txt"
+mdf_filename_list = ["WHTC_Day7_3_Hot_05022020_10Hz_MDF.txt"]
 
 
 if bosmal_filename.split('_')[3].upper()=='COLD':
@@ -46,7 +46,7 @@ if bosmal_filename.split('_')[3].upper()=='COLD':
 else:
     x_lim=[0, 1900] ; x_tick = 100
     WHTC_segments=[(50, 375), (375, 825), (800, 1250), (1200, 1625), (1550, 1925)]
-    mdf_time_offsets_list = [1568.0-1381.0]         # offset time in seconds (initial points of Bosmal file - INITIAL MDF)
+    mdf_time_offsets_list = [0.5-6.61]         # offset time in seconds (initial points of Bosmal file - INITIAL MDF)
 report_name = '_'.join(bosmal_filename.split('_')[0:4])
 
 LEGEND_BEST =	0

@@ -28,6 +28,7 @@ from PIL import Image as pil_img
 class Test_Info():
     def __init__(self):
         self.elements = None
+        self.type = None
         self.date = None
         self.number = None
 
@@ -108,7 +109,9 @@ def main(argv):
 
     test_info = Test_Info()
     test_info.elements = pwd.split('_')
-    test_info.date = None
+    test_info.type = test_info.elements[2]
+    test_info.date = test_info.elements[3]
+    test_info.number = test_info.elements[4]
 
     pwd = gen_pwd
 
@@ -157,10 +160,21 @@ def main(argv):
     doc_story.append(Paragraph(ptext, styles["Heading2"]))
     doc_story.append(Spacer(1, 12))
 
-    ptext = '<font size=12>Date of report: %s</font>' % formatted_time
+    ptext = '<font size=12>Print date of report: %s</font>' % formatted_time
     doc_story.append(Paragraph(ptext, styles["Heading3"]))
     doc_story.append(Spacer(1, 12))
 
+    ptext = '<font size=12>Test type: %s</font>' % test_info.type
+    doc_story.append(Paragraph(ptext, styles["Heading3"]))
+    doc_story.append(Spacer(1, 8))
+
+    ptext = '<font size=12>Test date: %s</font>' % test_info.date
+    doc_story.append(Paragraph(ptext, styles["Heading3"]))
+    doc_story.append(Spacer(1, 8))
+
+    ptext = '<font size=12>Test number in date: %s</font>' % test_info.number
+    doc_story.append(Paragraph(ptext, styles["Heading3"]))
+    doc_story.append(Spacer(1, 8))
 
     doc_story.append(PageBreak())
 
