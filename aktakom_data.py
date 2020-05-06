@@ -89,7 +89,7 @@ class Akta_Data():
 
 
                     elif line_count> 2:
-                        # print(f'Values number  are {", ".join(row)}')
+                        # print(f'Values conf  are {", ".join(row)}')
 
                         data_rows +=1
                         for idx,col_data in enumerate(row):

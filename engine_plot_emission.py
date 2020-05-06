@@ -272,7 +272,7 @@ y6 = np.array(MDF_dict[56]['values'])  ## zsUegoLambda
 
 # Contiguous series of exhaust temperature bulk treated
 start_column = 12
-n_line = 13  # starting column and number of contiguous columns to be imported
+n_line = 13  # starting column and conf of contiguous columns to be imported
 y_temp = np.empty([n_line, len(ADA_dict[start_column]['values'])], dtype=float)
 y_temp_label = []
 # COLORS   '0        ','1        ','2        ','3        '4          ','5        ','6        ','7         ',

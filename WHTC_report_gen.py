@@ -55,7 +55,7 @@ def txt_from_file(txt_file_path=None):
 #----------------------------------------------------------------------
 def addPageNumber(canvas, doc):
     """
-    Add the page number
+    Add the page conf
     """
     page_num = canvas.getPageNumber()
     text = "page {}".format(page_num)
@@ -172,7 +172,7 @@ def main(argv):
     doc_story.append(Paragraph(ptext, styles["Heading3"]))
     doc_story.append(Spacer(1, 8))
 
-    ptext = '<font size=12>Test number in date: %s</font>' % test_info.number
+    ptext = '<font size=12>Test conf in date: %s</font>' % test_info.number
     doc_story.append(Paragraph(ptext, styles["Heading3"]))
     doc_story.append(Spacer(1, 8))
 

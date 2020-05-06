@@ -32,7 +32,7 @@ data_path = "D:\Application_data\yamzv8data\cal_0E_0F"
 ada_filename = "ADA_KL_100_20190529_CAL_0E_0F_test2.txt"
 mdf_filename = "MDF_KL_100_20190529_cal0E_0F_test2.TXT"
 
-num_cyls = 8            # number of cylinders of engine, for plotting the exhaust temperatures of single cylinder
+num_cyls = 8            # conf of cylinders of engine, for plotting the exhaust temperatures of single cylinder
 
 # creating a range of cluster for aggregating on engine speed
 PowCurveRPM_min = 600

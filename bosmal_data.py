@@ -60,7 +60,7 @@ class Bosmal_Data():
                         data_rows = 0
                     elif line_count> 1:
 
-                        # print(f'Values number  are {", ".join(row)}')
+                        # print(f'Values conf  are {", ".join(row)}')
                         data_rows +=1
                         for idx,col_data in enumerate(row):
                             if col_data == '':

@@ -58,7 +58,7 @@ class Mdf_Data():
                         ts = 0.0
 
                     else :
-                        # print(f'Values number  are {", ".join(row)}')
+                        # print(f'Values conf  are {", ".join(row)}')
                         if len(row)< len(self.mdf_dik):
                             break
                         data_rows +=1

@@ -30,11 +30,11 @@ x_lim=[0,720]
 report_name = "Power_Steady_report"
 
 ## Define input signal location in columns
-## MDF datafile parameters column number assignement
+## MDF datafile parameters column conf assignement
 bsRPM=45; zsTExh=18; zsUegoLambda = 57; qsLamObtFin = 39; vsTorqueReqVCM2=31; zsMap = 10; asEtasp = 11; zsLambdaPost =12
 zsPAtm = 13; zsPBoost = 14; zsTh2o=64; zsTAir=65; zsTRail=16; jsAdv=42; jsAdvBase=43
 
-## ADAMO datafile parameters column number assignement
+## ADAMO datafile parameters column conf assignement
 ADA_Pboost = 37; ADA_P_Intake_Manifold = 38; ADA_P_Inlet_Turbocharger=39 ; ADA_P_out_Turbine=40; ADA_P_In_Cat =41;
 ADA_P_Out_Cat = 42; ADA_Brake_speed=6; ADA_Power_KW=4; ADA_Torque=7;ADA_CNG=9; ADA_T_h2o=25; ADA_T_H2O_Out_Engine=26
 ADA_T_Asp_Cyl_1=27; ADA_T_Asp_Cyl_4 = 28; ADA_T_Asp_Cyl_5=29; ADA_T_Asp_Cyl_8=30; ADA_T_Gas_Out_Rid = 31
@@ -377,7 +377,7 @@ cl_ADA_BSFC = "BSFC gr/kWh"
 
 # Contiguous series of exhaust temperature bulk treated
 start_column = 12
-n_line = 13  # starting column and number of contiguous columns to be imported
+n_line = 13  # starting column and conf of contiguous columns to be imported
 y_temp = np.empty([n_line, len(ADA_dict[start_column]['values'])], dtype=float)
 y_temp_label = []
 # COLORS   '0        ','1        ','2        ','3        '4          ','5        ','6        ','7         ',

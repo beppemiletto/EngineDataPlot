@@ -47,7 +47,7 @@ def txt_from_file(txt_file_path=None):
 #----------------------------------------------------------------------
 def addPageNumber(canvas, doc):
     """
-    Add the page number
+    Add the page conf
     """
     page_num = canvas.getPageNumber()
     text = "page {}".format(page_num)
@@ -204,13 +204,13 @@ def main(argv):
         figure_2 = True
 
         if esc_completed:
-            ptext = "Pictures of the completed simplified ESC number {}.".format(esc_num+1)
+            ptext = "Pictures of the completed simplified ESC conf {}.".format(esc_num+1)
             doc_story.append(Paragraph(ptext, styles["Heading2"]))
             doc_story.append(Spacer(1, 3))
             ptext = "The ESC completed means that no violations to the engine speeds and load percentages occured during the execution."
             doc_story.append(Paragraph(ptext, styles["Normal"]))
         else:
-            ptext = "Pictures of the NOT completed simplified ESC number {}.".format(esc_num + 1)
+            ptext = "Pictures of the NOT completed simplified ESC conf {}.".format(esc_num + 1)
             doc_story.append(Paragraph(ptext, styles["Heading2"]))
             doc_story.append(Spacer(1, 3))
             ptext = """The ESC NOT completed means that one or more violations to the engine speeds and load 

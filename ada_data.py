@@ -57,7 +57,7 @@ class Ada_Data():
                             self.ada_dik['{:03d}'.format(idx)]['data']=[]
                         data_rows = 0
                     elif line_count> 11:
-                        # print(f'Values number  are {", ".join(row)}')
+                        # print(f'Values conf  are {", ".join(row)}')
 
                         data_rows +=1
                         for idx,col_data in enumerate(row):
