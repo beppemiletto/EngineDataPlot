@@ -1,6 +1,6 @@
 
 """
-Simple demo with multiple subplots.
+Power Curve Plot Data from Bosmal Mercedes NGV
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,14 +32,14 @@ def row_count(input):
 ## INPUT DATA AND FILES DEFINITIONS
 
 
-datafile_path = "D:\\Application_data\\Yuchai_K05N\\K05N_Yuc_P26_vs_P25_vs_P20_Mil\\"
+datafile_path = "D:\\Application_data\\Mercedes_NGV\\Power_Curve_20200607\\"
 
-EXCEL_file = "K05N_Yuc_P26_vs_P25_vs_P20_Mil.xlsx"
+EXCEL_file = "PC_20200607.xlsx"
 
 excel_book = xlrd.open_workbook(os.path.join(datafile_path,EXCEL_file))
 
-graph_tile = "Yuchai K05N - Stripping pipes"
-report_name = "K05N_Yuc_P26_vs_P25_vs_P20_Mil"
+graph_tile = "OM906 - Power Curve"
+report_name = EXCEL_file.split('.')[0]
 
 report_path = os.path.join(datafile_path,report_name)
 
@@ -54,16 +54,17 @@ print ("Nr. {} Sheets found in {}. Names ={}".format(excel_book.nsheets, EXCEL_f
 
 dsheet = excel_book.sheet_by_index(0)
 
-curves_conf_labels_rows = [(9, 8, 'red'), (24, 8 , 'grey'), (39, 15, 'orange')]
+# curves_conf_labels_rows = [(9, 8, 'red'), (24, 8 , 'grey'), (39, 15, 'orange')]
 # curves_conf_labels_rows = [(9, 8, 'red'), (24, 8 , 'grey')]
+curves_conf_labels_rows = [(1, 13, 'red')]
 
 pars =  [
-    {'name': 'rpm', 'column': 0},
-    {'name': 'tinturb', 'column': 1},
-    {'name': 'power', 'column': 2},
-    {'name': 'bsfc', 'column': 3},
-    {'name': 'jsadv', 'column': 4},
-    {'name': 'torque', 'column': 5}
+    {'name': 'rpm', 'column': 43},
+    {'name': 'tinturb', 'column': 69},
+    {'name': 'power', 'column': 26},
+    {'name': 'bsfc', 'column': 68},
+    {'name': 'jsadv', 'column': 70},
+    {'name': 'torque', 'column': 45}
 
 ]
 
@@ -76,14 +77,14 @@ for conf, rows in enumerate(curves_conf_labels_rows):
     data_rows = rows[1]
     color = rows[2]
     c_data[conf] = {}
-    c_data[conf]['conf_txt'] = dsheet.cell(row - 1, 0)
+    c_data[conf]['conf_txt'] = dsheet.cell(row + 23, 0)
     c_data[conf]['color'] = color
 
     for i, par in enumerate(pars):
         c_data[conf][par['name']] = {}
-        c_data[conf][par['name']]['data'] = cell2data(dsheet.col_slice(par['column'], row + 3, row + 3 + data_rows))
-        c_data[conf][par['name']]['label'] = dsheet.cell(row + 1, par['column'])
-        c_data[conf][par['name']]['um'] = dsheet.cell(row + 2, par['column'])
+        c_data[conf][par['name']]['data'] = cell2data(dsheet.col_slice(par['column'], row + 1, row + 1 + data_rows))
+        c_data[conf][par['name']]['label'] = dsheet.cell(row - 1, par['column'])
+        c_data[conf][par['name']]['um'] = dsheet.cell(row , par['column'])
     #
     # c_data[conf]['tinturb'] = {}
     # c_data[conf]['tinturb']['data'] = cell2data(dsheet.col_slice(1, row + 3, row + 3 + data_rows))
@@ -106,7 +107,7 @@ for conf, rows in enumerate(curves_conf_labels_rows):
     # c_data[conf]['jsadv']['um'] = dsheet.cell(row + 2, 4)
 
 
-rpm_lim = [600, 2400, 200]
+rpm_lim = [600, 2600, 200]
 rpm_step=200                        #rpm for Power Curve
 PowerCurve = True                   # Set True if plotting power Curve is needed, False if only plot f(time) needed
 
@@ -135,7 +136,7 @@ if PowerCurve:
         ax1.plot(c_data[key]['rpm']['data'], c_data[key]['power']['data'],linestyle='solid', linewidth= line_size, 
                  color = c_data[key]['color'], marker=".", markersize=10, label=c_data[key]['conf_txt'].value)
     ax1.set_xlim(rpm_lim[0], rpm_lim[1]); ax1.set_xticks(range(rpm_lim[0],rpm_lim[1]+rpm_lim[2],rpm_lim[2]))
-    ax1.set_ylim(20,160);ax1.set_yticks(range(20,160,20),minor=True)
+    ax1.set_ylim(40,180);ax1.set_yticks(range(40,180,20),minor=True)
     ax1.set_xticklabels([])
     ax1.set_title(graph_tile, fontsize= 'x-large')
 
