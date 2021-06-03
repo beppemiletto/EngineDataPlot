@@ -83,8 +83,7 @@ PowerCurve = True                   # Set True if plotting power Curve is needed
 # CANAPE datafile parameters
 # missing removed pars :  'zsUegoLambda','qsLamObtFin', 'zsMap',"qsTInj",
 mdf_signal_list = ['bsRPM', 'zsTExh',  'esTorqueReqExt', 'zsPBoost','zsUegoLambda','qsLamObtFin', 'zsMap',"qsTInj",
-                   'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank",
-                    "zsTRail"]
+                   'zsTh2o', 'zsTAir', 'zsTRail', 'jsAdv', 'jsAdvBase', "zsPRail", "zsPTank"]
 
 # ADAMO datafile parameters
 ada_signal_list = [

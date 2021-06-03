@@ -32,14 +32,14 @@ def row_count(input):
 ## INPUT DATA AND FILES DEFINITIONS
 
 
-datafile_path = "D:\\Application_data\\Yuchai_K05N\\K05N_Yuc_P26_vs_P25_vs_P20_Mil\\"
+datafile_path = "D:\\Application_data\\Yuchai_K05N\\760_ref_HDS9\\"
 
-EXCEL_file = "K05N_Yuc_P26_vs_P25_vs_P20_Mil.xlsx"
+EXCEL_file = "K05N_Yuc_760_12_115_rif.xlsx"
 
 excel_book = xlrd.open_workbook(os.path.join(datafile_path,EXCEL_file))
 
-graph_tile = "Yuchai K05N - Stripping pipes"
-report_name = "K05N_Yuc_P26_vs_P25_vs_P20_Mil"
+graph_tile = "Yuchai K05N - Power Curves HDS9 vs EC - TIT limited 760°C"
+report_name = "FullPowerCurve_760limited_Comparison"
 
 report_path = os.path.join(datafile_path,report_name)
 
@@ -54,6 +54,8 @@ print ("Nr. {} Sheets found in {}. Names ={}".format(excel_book.nsheets, EXCEL_f
 
 dsheet = excel_book.sheet_by_index(0)
 
+# curves_conf_labels_rows = [(9, 8, 'red'),  (39, 15, 'orange')]
+# curves_conf_labels_rows = [ (24, 8 , 'grey'), (39, 15, 'orange')]
 curves_conf_labels_rows = [(9, 8, 'red'), (24, 8 , 'grey'), (39, 15, 'orange')]
 # curves_conf_labels_rows = [(9, 8, 'red'), (24, 8 , 'grey')]
 
@@ -174,7 +176,7 @@ if PowerCurve:
     ax3.set_xlim(rpm_lim[0], rpm_lim[1]); ax3.set_xticks(range(rpm_lim[0],rpm_lim[1]+rpm_lim[2],rpm_lim[2]))
     ax3.set_xticklabels([])
     ax3.set_ylim(600, 900);
-    ax3.set_yticks(range(600, 900, 50), minor=True)
+    ax3.set_yticks(range(600, 900, 50), minor=False)
     ax3.set_ylabel("Temperature [deg C]")
     ax3.grid()
     # ax3.legend(shadow=False, loc=(3), fontsize='xx-small')
