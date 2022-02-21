@@ -20,6 +20,25 @@
           <option value="Full_Power_New_190517_missingMDF.v_MDF_bsRPM" />
           <option value="WHTC_testing.*" />
           <option value="WHSC_mapping.*" />
+          <option value="ETC_ARAI.v_MDF_qsQAIR_INT_THR" />
+          <option value="ETC_ARAI.t_MDF_qsQAIR_INT_THR" />
+          <option value="ETC_ARAI.v_DYNO_SPEED" />
+          <option value="ETC_ARAI.l_DYNO_SPEED" />
+          <option value="ETC_ARAI.t_MDF_esQAir_Request" />
+          <option value="ETC_ARAI.v_MDF_esQAir_Request" />
+          <option value="ETC_ARAI.l_MDF_esQAir_Request" />
+          <option value="ETC_ARAI.t_MDF_qsQAirReqLeanIn" />
+          <option value="ETC_ARAI.v_MDF_qsQAirReqLeanIn" />
+          <option value="ETC_ARAI.l_MDF_qsQAirReqLeanIn" />
+          <option value="ETC_ARAI.t_MDF_qsQAirReqLeanOut" />
+          <option value="ETC_ARAI.v_MDF_qsQAirReqLeanOut" />
+          <option value="ETC_ARAI.l_MDF_qsQAirReqLeanOut" />
+          <option value="ETC_ARAI.l_MDF_qsQAIR_INT_THR" />
+          <option value="ETC_ARAI.t_MDF_qsQAirReqDiff" />
+          <option value="ETC_ARAI.v_MDF_qsQAirReqDiff" />
+          <option value="ETC_ARAI.l_MDF_qsQAirReqDiff" />
+          <option value="ETC_ARAI.v_DYNO_TC_TURB1" />
+          <option value="ETC_ARAI.l_DYNO_TC_TURB1" />
         </list>
       </option>
     </inspection_tool>

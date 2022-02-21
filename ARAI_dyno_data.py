@@ -34,16 +34,16 @@ class Dyno_Data():
         except OSError as e:
             print("Pickle file {} doesn't exist. Proceeding with data import. Wait! It can require long times!".format(self.tuv_pickle_filepath))
         if not os.path.exists(self.tuv_pickle_filepath):
-            with open(self.tuv_filepath) as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter ='\t')
+            with open(self.tuv_filepath, 'r', encoding='Latin1') as csv_file:
+                csv_reader = csv.reader(csv_file,  delimiter=',')
                 line_count = 0
                 buffer_recovery_data = []
                 for row in csv_reader:
-                    if line_count== 0:
+                    if line_count== 3:
                         col_names= row
                         print(f'Column names are {", ".join(row)}')
 
-                    elif line_count== 1:
+                    elif line_count== 4:
                         print(f'Column meas units are {", ".join(row)}')
                         col_um = row
 
@@ -54,7 +54,7 @@ class Dyno_Data():
                             self.tuv_dik['{:03d}'.format(idx)]['data']=[]
                             buffer_recovery_data.append(0)
                         data_rows = 0
-                    elif line_count> 1:
+                    elif line_count> 4:
 
                         # print(f'Values conf  are {", ".join(row)}')
                         data_rows +=1
